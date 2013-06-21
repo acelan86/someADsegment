@@ -1,4 +1,4 @@
-function Schedule(ranges) {
+        function Schedule(ranges) {
             ranges = 'string' === typeof ranges ? [ranges] : ranges || [];
 
             this.ranges = [];
