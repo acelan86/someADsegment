@@ -74,7 +74,7 @@ Schedule.prototype = {
             i = 0,
             range,
             result = ranges.length <= 0,
-            time = time ? (+this.parse(time)) || (+new Date());//没给时间，使用当前时间检查
+            time = time ? (+this.parse(time)) : (+new Date());//没给时间，使用当前时间检查
 
         while (!result && (range = ranges[i++])) {
             result = time >= range[0] && time <= range[1];
