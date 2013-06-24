@@ -21,8 +21,6 @@ function Schedule(ranges) {
 
     this.ranges = [];
 
-    console.log(ranges);
-
     var range,
         i = 0,
         len = ranges.length,
@@ -32,7 +30,7 @@ function Schedule(ranges) {
         todayStr = now.getFullYear() + '/' + (now.getMonth() + 1) + '/' + now.getDate();
 
     for(; i < len; i++) {
-        range = ranges[i].split('~');
+        range = ranges[i].replace(/\-/g, '/').split('~');
 
         start = range[0];
         end = range[1] ? range[1] : range[0]; //"2013-6-21" -> "2013-06-21, 2013-06-21"
@@ -53,8 +51,8 @@ function Schedule(ranges) {
             end = todayStr + ' ' + end;
         }
 
-        start = +Schedule.parseDate(start);
-        end = +Schedule.parseDate(end);
+        start = +this.parse(start);
+        end = +this.parse(end);
 
         //后面的时间比前面的小，则表明跨天，增加一天时间
         if (end <= start) {
@@ -64,42 +62,51 @@ function Schedule(ranges) {
         this.ranges[i] = [start, end];
     }
 }
-Schedule.parseDate = function (time) {
-    var reg = new RegExp("^\\d+(\\-|\\/)\\d+(\\-|\\/)\\d+\x24");
-    if ('string' == typeof time) {
-        if (reg.test(time) || isNaN(Date.parse(time))) {
-            var d = time.split(/ |T/),
-                d1 = d.length > 1 
-                        ? d[1].split(/[^\d]/) 
-                        : [0, 0, 0],
-                d0 = d[0].split(/[^\d]/);
-            return new Date(d0[0] - 0, 
-                            d0[1] - 1, 
-                            d0[2] - 0, 
-                            d1[0] - 0, 
-                            d1[1] - 0, 
-                            d1[2] - 0);
-        } else {
-            return new Date(time);
+
+Schedule.prototype = {
+    /**
+     * 检查是否在日程范围内
+     * @param  {String | Date} time 要检查的日期
+     * @return {Boolean}            是否在日程内
+     */
+    check : function (time) {
+        var ranges = this.ranges,
+            i = 0,
+            range,
+            result = ranges.length <= 0,
+            time = +this.parse(time);
+        while (!result && (range = ranges[i++])) {
+            result = time >= range[0] && time <= range[1];
         }
+        return result;
+    },
+    /**
+     * 解析方法
+     * @tangram T.date.parse
+     */
+    parse : function (time) {
+        var reg = new RegExp("^\\d+(\\-|\\/)\\d+(\\-|\\/)\\d+\x24");
+        if ('string' == typeof time) {
+            if (reg.test(time) || isNaN(Date.parse(time))) {
+                var d = time.split(/ |T/),
+                    d1 = d.length > 1 
+                            ? d[1].split(/[^\d]/) 
+                            : [0, 0, 0],
+                    d0 = d[0].split(/[^\d]/);
+                return new Date(d0[0] - 0, 
+                                d0[1] - 1, 
+                                d0[2] - 0, 
+                                d1[0] - 0, 
+                                d1[1] - 0, 
+                                d1[2] - 0);
+            } else {
+                return new Date(time);
+            }
+        }
+         
+        return time;
     }
-     
-    return time;
 };
-Schedule.prototype.check = function (time) {
-    var ranges = this.ranges,
-        i = 0,
-        range,
-        result = ranges.length <= 0,
-        time = +Schedule.parseDate(time);
-    while (range = ranges[i++]) {
-        result = time >= range[0] && time <= range[1];
-        if (result) {
-            return result;
-        }
-    }
-    return result;
-}
 
 /*
 //usage
