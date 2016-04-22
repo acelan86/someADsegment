@@ -40,7 +40,7 @@ function Schedule(ranges) {
             start += ' 0:0:0';
         }
         if (end.indexOf(':') === -1) {
-            end += ' 0:0:0';
+            end += ' 23:59:59';
         }
 
         //"10:0:0" -> "2013-6-21 10:0:0" today 10:0:0
